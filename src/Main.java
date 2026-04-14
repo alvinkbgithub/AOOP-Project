@@ -105,32 +105,45 @@ public class Main extends Application {
     @SuppressWarnings("unchecked")
     private TableView<Product> createProductTable() {
         TableView<Product> table = new TableView<>();
+
+        // Proper resizing + row height fix
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setFixedCellSize(28);
+
         table.setPlaceholder(new Label("No products in inventory. Add one using the form."));
 
         // ID column
         TableColumn<Product, Integer> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getId()).asObject());
-        idCol.setPrefWidth(60);
 
         // Name column
         TableColumn<Product, String> nameCol = new TableColumn<>("Product Name");
         nameCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
-        nameCol.setPrefWidth(220);
 
         // Quantity column
         TableColumn<Product, Integer> qtyCol = new TableColumn<>("Quantity");
         qtyCol.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getQuantity()).asObject());
-        qtyCol.setPrefWidth(100);
 
         // Price column
         TableColumn<Product, Double> priceCol = new TableColumn<>("Price (KES)");
         priceCol.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getPrice()).asObject());
-        priceCol.setPrefWidth(120);
 
-        // Info column — uses polymorphic getDisplayInfo()
+        // Proper price formatting
+        priceCol.setCellFactory(tc -> new TableCell<Product, Double>() {
+            @Override
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty || price == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("KES %.2f", price));
+                }
+            }
+        });
+
+        // Info column
         TableColumn<Product, String> infoCol = new TableColumn<>("Display Info");
         infoCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getDisplayInfo()));
-        infoCol.setPrefWidth(320);
 
         table.getColumns().addAll(idCol, nameCol, qtyCol, priceCol, infoCol);
         table.setItems(productList);
